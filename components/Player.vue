@@ -7,7 +7,7 @@
     {{ audio.title }}
     <v-container>
       <v-row justify="center">
-        <v-icon> mdi-skip-backward </v-icon>
+        <v-icon @click="prev()"> mdi-skip-backward </v-icon>
         <v-icon style="margin: 0 15px" large @click="playOrPause()">{{
           played ? 'mdi-pause' : 'mdi-play'
         }}</v-icon>
@@ -91,10 +91,30 @@ export default {
       if (
         this.playlist.length !== 0 &&
         this.playingAudio.howl &&
-        this.currentAudioIndex < this.playlist.length
+        this.currentAudioIndex < this.playlist.length - 1
       ) {
-        const audio = this.playlist[this.currentAudioIndex + 1]
+        const nextAudioIndex = 1
+        const audio = this.playlist[this.currentAudioIndex + nextAudioIndex]
         this.$store.commit('currentAudio', audio)
+        this.$store.commit(
+          'currentAudioIndex',
+          this.currentAudioIndex + nextAudioIndex
+        )
+      }
+    },
+    prev() {
+      if (
+        this.playlist.length !== 0 &&
+        this.playingAudio.howl &&
+        this.currentAudioIndex > 0
+      ) {
+        const prevAudioIndex = 1
+        const audio = this.playlist[this.currentAudioIndex - prevAudioIndex]
+        this.$store.commit('currentAudio', audio)
+        this.$store.commit(
+          'currentAudioIndex',
+          this.currentAudioIndex - prevAudioIndex
+        )
       }
     },
   },
