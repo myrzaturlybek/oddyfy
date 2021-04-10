@@ -1,11 +1,11 @@
 <template>
   <v-container>
     <v-list>
-      <v-list-item-group v-model="model">
+      <v-list-item-group>
         <v-list-item
           v-for="(beat, index) in album"
           :key="beat.title"
-          @click="play({ beat: index, album: album })"
+          @click="play({ beat: beat, album: album, index: index })"
         >
           <v-list-item-icon>
             <v-icon v-text="'mdi-play'"></v-icon>
@@ -35,11 +35,11 @@ export default {
         {
           title: 'sasygan it2',
           artist: 'oddy',
-          src: 'http://localhost:3000/m1.mp3',
-          pic: 'http://localhost:3000/02.jpg',
+          src: 'http://localhost:3000/m2.wav',
+          pic: 'http://localhost:3000/01.jpg',
         },
       ],
-      model: 1,
+      // model: 1,
     }
   },
   methods: {

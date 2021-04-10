@@ -4,13 +4,14 @@
       v-model="currentAudioProgress"
       height="15"
     ></v-progress-linear>
+    {{ audio.title }}
     <v-container>
       <v-row justify="center">
         <v-icon> mdi-skip-backward </v-icon>
         <v-icon style="margin: 0 15px" large @click="playOrPause()">{{
           played ? 'mdi-pause' : 'mdi-play'
         }}</v-icon>
-        <v-icon> mdi-skip-forward </v-icon>
+        <v-icon @click="next()"> mdi-skip-forward </v-icon>
       </v-row>
     </v-container>
   </v-footer>
@@ -20,66 +21,81 @@
 import { mapState } from 'vuex'
 import { Howl } from 'howler'
 export default {
+  props: {
+    audio: {
+      type: Object,
+      default() {
+        return {
+          beat: {
+            title: '',
+            artist: '',
+            src: '',
+            pic: '',
+          },
+        }
+      },
+    },
+    playlist: {
+      type: Array,
+      default() {
+        return [
+          {
+            title: '',
+            artist: '',
+            src: '',
+            pic: '',
+          },
+        ]
+      },
+    },
+  },
   data() {
     return {
       played: false,
-      sound: this.newHowl(''),
       currentAudioProgress: 0,
+      playingAudio: {},
     }
   },
   computed: {
     ...mapState({
-      currentAudio: (state) => state.currentAudio,
-      currentPlaylist: (state) => state.currentPlaylist,
+      currentAudioIndex: (state) => state.currentAudioIndex,
     }),
   },
   watch: {
-    currentAudio() {
-      let audio = ''
-      if (this.currentPlaylist.length !== 0) {
-        audio = this.currentPlaylist[this.currentAudio].src
+    audio() {
+      const audio = Object.create(this.audio)
+      if (this.playingAudio.howl) {
+        this.playingAudio.howl.stop()
       }
-      this.sound = this.newHowl(audio)
-    },
-    currentPlaylist() {
-      let audio = ''
-      if (this.currentPlaylist.length !== 0) {
-        audio = this.currentPlaylist[this.currentAudio].src
-      }
-      this.sound = this.newHowl(audio)
-    },
-    sound() {
-      this.sound.on('end', () => {
-        console.log(this.sound)
-      })
+      this.playingAudio = audio
+      this.play()
     },
   },
   methods: {
     playOrPause() {
-      if (this.currentPlaylist.length !== 0) {
-        this.played ? this.sound.pause() : this.sound.play()
+      if (this.playingAudio.howl) {
+        this.playingAudio.howl.playing()
+          ? this.playingAudio.howl.pause()
+          : this.playingAudio.howl.play()
         this.played = !this.played
       }
     },
-
-    newHowl(src) {
-      function step() {
-        const sound = this.sound
-        const seek = this.seek() || 0
-        this.currentAudioProgress = (seek / sound.duration()) * 100
-        if (sound.playing()) {
-          step()
-        }
-      }
-      return new Howl({
-        src: [src],
-        onplay() {
-          step().bind(this)
-        },
-        onseek() {
-          step().bind(this)
-        },
+    play() {
+      this.playingAudio.howl = new Howl({
+        src: [this.playingAudio.src],
       })
+      this.playingAudio.howl.play()
+      this.played = true
+    },
+    next() {
+      if (
+        this.playlist.length !== 0 &&
+        this.playingAudio.howl &&
+        this.currentAudioIndex < this.playlist.length
+      ) {
+        const audio = this.playlist[this.currentAudioIndex + 1]
+        this.$store.commit('currentAudio', audio)
+      }
     },
   },
 }

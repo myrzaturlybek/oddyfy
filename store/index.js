@@ -1,12 +1,17 @@
 export const state = () => ({
   currentPlaylist: [],
-  currentAudio: 0,
+  currentAudio: {},
+  currentAudioIndex: 0,
 })
 
 export const mutations = {
+  currentAudio(state, audio) {
+    state.currentAudio = audio
+  },
   play(state, playlist) {
     state.currentPlaylist = playlist.album
     state.currentAudio = playlist.beat
+    state.currentAudioIndex = playlist.index
   },
 }
 
@@ -22,5 +27,8 @@ export const getters = {
   },
   currentAudio: (state) => {
     return state.currentAudio
+  },
+  currentAudioIndex: (state) => {
+    return state.currentAudioIndex
   },
 }

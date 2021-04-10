@@ -44,7 +44,7 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <Player />
+    <Player :audio="currentAudio" :playlist="currentPlaylist" />
   </v-app>
 </template>
 
