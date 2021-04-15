@@ -38,6 +38,36 @@ export default {
           src: 'http://localhost:3000/m2.wav',
           pic: 'http://localhost:3000/01.jpg',
         },
+        {
+          title: 'sasygan it3',
+          artist: 'oddy',
+          src: 'http://localhost:3000/m3.mp3',
+          pic: 'http://localhost:3000/01.jpg',
+        },
+        {
+          title: 'sasygan it4',
+          artist: 'oddy',
+          src: 'http://localhost:3000/m4.mp3',
+          pic: 'http://localhost:3000/01.jpg',
+        },
+        {
+          title: 'sasygan it5',
+          artist: 'oddy',
+          src: 'http://localhost:3000/m5.mp3',
+          pic: 'http://localhost:3000/01.jpg',
+        },
+        {
+          title: 'sasygan it6',
+          artist: 'oddy',
+          src: 'http://localhost:3000/m6.mp3',
+          pic: 'http://localhost:3000/01.jpg',
+        },
+        {
+          title: 'sasygan it7',
+          artist: 'oddy',
+          src: 'http://localhost:3000/m7.mp3',
+          pic: 'http://localhost:3000/01.jpg',
+        },
       ],
       // model: 1,
     }

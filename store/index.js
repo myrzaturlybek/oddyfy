@@ -11,6 +11,9 @@ export const mutations = {
   currentAudioIndex(state, index) {
     state.currentAudioIndex = index
   },
+  currentPlaylist(state, playlist) {
+    state.currentPlaylist = playlist
+  },
   play(state, playlist) {
     state.currentPlaylist = playlist.album
     state.currentAudio = playlist.beat
