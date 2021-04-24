@@ -1,25 +1,51 @@
 <template>
   <v-footer padless class="player">
-    <v-progress-linear
-      v-model="currentAudioProgress"
-      height="15"
-    ></v-progress-linear>
-    {{ audio.title }}
+    <!-- <v-progress-linear
+      v-model="playingAudioProgress"
+      height="13"
+      class="progress"
+    ></v-progress-linear> -->
+    <div id="progressBar">
+      <div id="progress"></div>
+    </div>
+    <div class="audio-info">
+      <div class="pic">
+        <v-img :width="50" :src="playingAudio.pic" aspect-ratio="1"></v-img>
+      </div>
+      <div style="padding-left: 7px">
+        <p class="font-weight-bold" style="margin-bottom: 0">
+          {{ playingAudio.title }}
+        </p>
+        <p class="subtitle-2">{{ playingAudio.artist }}</p>
+      </div>
+    </div>
+
     <v-container>
       <v-row justify="center">
-        <v-icon @click="prev()"> mdi-skip-backward </v-icon>
-        <v-icon style="margin: 0 15px" large @click="playOrPause()">{{
+        <v-icon large @click="repeatSwitch()">{{
+          repeat ? 'mdi-repeat' : 'mdi-repeat-off'
+        }}</v-icon>
+        <v-icon large @click="prev()"> mdi-skip-backward </v-icon>
+        <v-icon large @click="playOrPause()">{{
           played ? 'mdi-pause' : 'mdi-play'
         }}</v-icon>
-        <v-icon @click="next()"> mdi-skip-forward </v-icon>
+        <v-icon large @click="next()"> mdi-skip-forward </v-icon>
+        <v-icon
+          large
+          :color="shuffled ? 'success' : ''"
+          @click="shuffleSwitch()"
+          >mdi-shuffle-variant</v-icon
+        >
       </v-row>
     </v-container>
-    <v-icon @click="repeatSwitch()">{{
-      repeat ? 'mdi-repeat' : 'mdi-repeat-off'
-    }}</v-icon>
-    <v-icon :color="shuffled ? 'success' : ''" @click="shuffleSwitch()"
-      >mdi-shuffle-variant</v-icon
-    >
+    <v-slider
+      v-model="volume"
+      class="volume"
+      min="0"
+      max="100"
+      prepend-icon="mdi-volume-high"
+      @change="editVolume"
+    ></v-slider>
   </v-footer>
 </template>
 
@@ -59,11 +85,12 @@ export default {
   data() {
     return {
       played: false,
-      currentAudioProgress: 0,
+      playingAudioProgress: 0,
       playingAudio: {},
       playingPlaylist: [],
       repeat: false,
       shuffled: false,
+      volume: 100,
     }
   },
   computed: {
@@ -113,11 +140,33 @@ export default {
       }
     },
     play() {
+      const self = this
       this.playingAudio.howl = new Howl({
         src: [this.playingAudio.src],
+        onplay() {
+          // Start upating the progress of the track.
+          requestAnimationFrame(self.step.bind(self))
+        },
       })
+
       this.playingAudio.howl.play()
       this.played = true
+    },
+    step() {
+      const self = this
+
+      // Get the Howl we want to manipulate.
+      const sound = self.playingAudio.howl
+
+      // Determine our current seek position.
+      const seek = sound.seek() || 0
+      const progress = document.getElementById('progress')
+      progress.style.width = ((seek / sound.duration()) * 100 || 0) + '%'
+
+      // If the sound is still playing, continue stepping.
+      if (sound.playing()) {
+        requestAnimationFrame(self.step.bind(self))
+      }
     },
     next() {
       if (
@@ -166,6 +215,9 @@ export default {
     shuffleSwitch() {
       this.shuffled = !this.shuffled
     },
+    editVolume() {
+      this.playingAudio.howl.volume(this.volume / 100)
+    },
   },
 }
 </script>
@@ -176,7 +228,38 @@ export default {
   bottom: 0;
   background: #272727;
   width: 100%;
-  z-index: 100;
   height: 70px;
+}
+#progressBar {
+  position: absolute;
+  height: 14px;
+  width: 100%;
+  top: -12px;
+  background: forestgreen;
+}
+#progress {
+  position: absolute;
+  height: 14px;
+  background: fuchsia;
+}
+.v-icon {
+  margin: 0 15px;
+}
+.pic {
+  width: 50px;
+  height: 50px;
+}
+.audio-info {
+  position: absolute;
+  left: 10px;
+  width: 250px;
+  display: flex;
+  top: 10px;
+}
+.volume {
+  position: absolute;
+  right: 30px;
+  top: 20px;
+  width: 150px;
 }
 </style>
