@@ -1,12 +1,14 @@
 <template>
   <v-footer padless class="player">
-    <!-- <v-progress-linear
-      v-model="playingAudioProgress"
-      height="13"
-      class="progress"
-    ></v-progress-linear> -->
     <div id="progressBar">
       <div id="progress"></div>
+      <div id="progressForSeek"></div>
+      <div class="timer">
+        {{ timer }}
+      </div>
+      <div class="duration">
+        {{ duration }}
+      </div>
     </div>
     <div class="audio-info">
       <div class="pic">
@@ -91,6 +93,8 @@ export default {
       repeat: false,
       shuffled: false,
       volume: 100,
+      timer: '0:00',
+      duration: '0:00',
     }
   },
   computed: {
@@ -127,6 +131,34 @@ export default {
       }
     },
   },
+  mounted() {
+    const progress = document.querySelector('#progress')
+    const progressForSeek = document.querySelector('#progressForSeek')
+    const progressBar = document.querySelector('#progressBar')
+    function resize(e) {
+      progressForSeek.style.width = e.clientX + 'px'
+      progress.style.width = e.clientX + 'px'
+    }
+    // progressBar.addEventListener('click', (e) => {
+    //   this.seek(e.clientX / window.innerWidth)
+    // })
+    progressBar.addEventListener('mousedown', (e) => {
+      progressForSeek.style.visibility = 'visible'
+      progress.style.visibility = 'hidden'
+      resize(e)
+      document.addEventListener('mousemove', resize, false)
+      document.addEventListener(
+        'mouseup',
+        (e) => {
+          document.removeEventListener('mousemove', resize, false)
+          progressForSeek.style.visibility = 'hidden'
+          progress.style.visibility = 'visible'
+          this.seek(e.clientX / progressBar.clientWidth)
+        },
+        { once: true }
+      )
+    })
+  },
   methods: {
     playOrPause() {
       if (this.playingAudio.howl) {
@@ -143,8 +175,18 @@ export default {
       const self = this
       this.playingAudio.howl = new Howl({
         src: [this.playingAudio.src],
+        volume: self.volume / 100,
         onplay() {
+          self.duration = self.formatTime(
+            Math.round(self.playingAudio.howl.duration())
+          )
           // Start upating the progress of the track.
+          requestAnimationFrame(self.step.bind(self))
+        },
+        onend() {
+          self.next()
+        },
+        onseek() {
           requestAnimationFrame(self.step.bind(self))
         },
       })
@@ -160,6 +202,7 @@ export default {
 
       // Determine our current seek position.
       const seek = sound.seek() || 0
+      this.timer = self.formatTime(Math.round(seek))
       const progress = document.getElementById('progress')
       progress.style.width = ((seek / sound.duration()) * 100 || 0) + '%'
 
@@ -209,6 +252,17 @@ export default {
         )
       }
     },
+    seek(per) {
+      const self = this
+
+      // Get the Howl we want to manipulate.
+      const sound = self.playingAudio.howl
+
+      // Convert the percent into a seek position.
+      if (sound) {
+        sound.seek(sound.duration() * per)
+      }
+    },
     repeatSwitch() {
       this.repeat = !this.repeat
     },
@@ -216,7 +270,15 @@ export default {
       this.shuffled = !this.shuffled
     },
     editVolume() {
-      this.playingAudio.howl.volume(this.volume / 100)
+      if (this.playingAudio.howl) {
+        this.playingAudio.howl.volume(this.volume / 100)
+      }
+    },
+    formatTime(secs) {
+      const minutes = Math.floor(secs / 60) || 0
+      const seconds = secs - minutes * 60 || 0
+
+      return minutes + ':' + (seconds < 10 ? '0' : '') + seconds
     },
   },
 }
@@ -236,11 +298,41 @@ export default {
   width: 100%;
   top: -12px;
   background: forestgreen;
+  font-size: 12px;
+  cursor: pointer;
+}
+#progressBar .timer {
+  position: absolute;
+  left: 15px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+#progressBar .duration {
+  position: absolute;
+  right: 15px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 #progress {
   position: absolute;
   height: 14px;
   background: fuchsia;
+}
+#progressForSeek {
+  position: absolute;
+  height: 14px;
+  background: fuchsia;
+  visibility: hidden;
 }
 .v-icon {
   margin: 0 15px;
