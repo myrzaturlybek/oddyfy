@@ -24,6 +24,7 @@
 <script>
 export default {
   components: {},
+  layout: 'app',
   data() {
     return {
       albums: [

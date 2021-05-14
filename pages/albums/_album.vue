@@ -23,6 +23,7 @@
 <script>
 import { mapActions } from 'vuex'
 export default {
+  layout: 'app',
   data() {
     return {
       album: [

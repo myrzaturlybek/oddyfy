@@ -42,10 +42,45 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    '@nuxtjs/auth-next',
   ],
 
+  router: {
+    middleware: ['auth'],
+  },
+
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {},
+  axios: {
+    baseURL: 'http://127.0.0.1:3001',
+  },
+
+  auth: {
+    redirect: {
+      login: '/login',
+      logout: '/',
+      callback: '/login',
+      home: '/',
+    },
+    strategies: {
+      local: {
+        user: {
+          autoFetch: false,
+        },
+        token: {
+          property: 'token.accessToken',
+        },
+        endpoints: {
+          login: {
+            url: 'auth/login',
+            method: 'post',
+            propertyName: 'accessToken',
+          },
+          user: false,
+          logout: false,
+        },
+      },
+    },
+  },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
